@@ -1,0 +1,8 @@
+{
+    "version": "1.2",
+    "items": [
+      {"vorname": "Maxi"},
+      {"vorname": "Minni"},
+      {"vorname": "Peter"}
+    ]
+  }
