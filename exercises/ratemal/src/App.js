@@ -8,13 +8,12 @@ const App = props => {
   // eslint-disable-next-line
   const [maxZahl, setMaxZahl] = useState(10);
   const [zufallsZahl, setZufallsZahl] = useState(RandomNumberGenerator(maxZahl));
+  console.log(zufallsZahl);
   const [versuche, setVersuche] = useState(0);
   const [gewonnen, setGewonnen] = useState(false);
   const [gespielteSpiele, setGespielteSpiele] = useState(0);
 
   const vergleicheZahlen = (gerateneZahl) => {
-    console.log('geraten: ' + typeof gerateneZahl);
-    console.log('zufallsZahl: ' + typeof zufallsZahl);
     setVersuche(versuche+1);
     if (gerateneZahl === zufallsZahl) {
       console.log('gewonnen!');
@@ -32,7 +31,7 @@ const App = props => {
   
   return (
     <div className="container">
-      <h1>Zufallszahl (cheating: {zufallsZahl}) erraten ...</h1>
+      <h1>Zufallszahl erraten ...</h1>
       {(gespielteSpiele > 0) &&
         <h3>{gespielteSpiele} Spiel{(gespielteSpiele > 1)?'e':''} bereits gespielt</h3>
       }
