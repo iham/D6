@@ -11,7 +11,7 @@ import CatPanel from "./component/CatPanel";
 import KPIPanel from "./component/KPIPanel";
 
 class App extends React.Component {
-  
+
   constructor(props) {
     super(props)
     this.taskService = new TaskService();
@@ -20,16 +20,29 @@ class App extends React.Component {
       showTaskForm: false,
       tasks: this.tmp,
       displayTasks: this.tmp,
-      filterMethod: "Alle"
+      filterMethod: "Alle",
+      sortMethod: ""
     };
 
-
+    const NOW = new Date();
     for (let pos = 0; pos < 50; pos++) {
       let t = new Task();
       t.title = `Aufgabe ${pos + 1}`;
+      
+      // set random category
       let cs = this.taskService.getKategorien()
-      t.kategorie = cs[Math.floor(Math.random()*cs.length)];
+      t.kategorie = cs[Math.floor(Math.random() * cs.length)];
+
+      // set some dueDates
+      if(pos % 5 === 0) {
+        const timestamp = Math.floor(Math.random() * NOW);
+        t.dueDate = new Date(timestamp);
+      }
+
+      // save task to service
       this.taskService.save(t);
+
+      // mark every third as done
       if (pos % 3 === 0) {
         this.taskService.setDone(t.id);
       }
@@ -38,6 +51,7 @@ class App extends React.Component {
     this.handleViewTaskForm = this.handleViewTaskForm.bind(this);
     this.handleSaveTask = this.handleSaveTask.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
+    this.handleSort = this.handleSort.bind(this);
   }
 
   handleFilter(filterMethod) {
@@ -63,8 +77,24 @@ class App extends React.Component {
     });
   }
 
+  handleSort(sortMethod) {
+    const { tasks } = this.state;
+    let displayTasks;
+    switch (sortMethod) {
+      case "dueDate":
+        displayTasks = tasks.sort((a, b) => a.dueDate - b.dueDate);
+        break;
+      case "kategorie":
+        displayTasks = tasks.sort((a, b) => a.kategorie.localeCompare(b.kategorie, 'de', { sensitivity: 'base' }));
+        break;
+      default:
+        displayTasks = tasks;
+    }
+    this.setState({ sortMethod, displayTasks });
+  }
+
   render() {
-    const { showTaskForm, displayTasks, filterMethod } = this.state;
+    const { showTaskForm, displayTasks, filterMethod, sortMethod } = this.state;
 
     const btnShowTaskFormLabel = showTaskForm ? "Abbrechen" : "Hinzufügen";
 
@@ -78,6 +108,7 @@ class App extends React.Component {
         </header>
 
         <main>
+          <Outlet />
 
           <button className="btn btn-primary btn-sm"
             onClick={this.handleViewTaskForm}>{btnShowTaskFormLabel}</button>
@@ -87,16 +118,38 @@ class App extends React.Component {
             taskService={this.taskService}
             onClose={() => this.setState({ showTaskForm: false })} />
 
-          <KPIPanel taskService={this.taskService}/>
-          <CatPanel taskService={this.taskService}/>
+          <div className="container mt-5">
+            <div className="row">
+              <div className="col">
+                <KPIPanel taskService={this.taskService} />
+              </div>
+              <div className="col">
+                <CatPanel taskService={this.taskService} />
+              </div>
+            </div>
 
-          <div className="mb-3">
-            <select name="filterMethod" className="form-select" onChange={evt => this.handleFilter(evt.target.value)}
-              value={filterMethod}>
-              <option value="Alle">Alle</option>
-              <option value="Offenen">Offenen</option>
-            </select>
           </div>
+
+          <div className="container mb-3">
+            <div className="row">
+              <div className="col">
+                <select name="filterMethod" className="form-select" onChange={evt => this.handleFilter(evt.target.value)}
+                  value={filterMethod}>
+                  <option value="Alle">Alle</option>
+                  <option value="Offenen">Offenen</option>
+                </select>
+              </div>
+              <div className="col">
+                <select name="sortMethod" className="form-select" onChange={evt => this.handleSort(evt.target.value)}
+                  value={sortMethod}>
+                  <option value="">Keine</option>
+                  <option value="dueDate">Fälligkeit</option>
+                  <option value="kategorie">Kategorie</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
 
           {displayTasks.map((t, index) => <TaskItem
             key={"task-item-" + index}

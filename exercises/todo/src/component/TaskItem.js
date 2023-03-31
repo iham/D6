@@ -6,7 +6,7 @@ function TaskItem(props) {
     return (
         <div className="card mb-2" >
             <div className="card-body">
-                <h5 className="card-title">{value.title}</h5>
+                <h5 className="card-title">{value.title} {`(${value.kategorie} | ${value.dueDate ? value.dueDate.toLocaleDateString('de-DE') : ''})`}</h5>
                 <p className="card-text">{value.text}</p>
                 {doneStateIcon}
                 {!value.done &&
